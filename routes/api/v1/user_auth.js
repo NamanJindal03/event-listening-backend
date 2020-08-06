@@ -16,6 +16,7 @@ router.post('/login', login);
 router.get('/logout', isSignedIn, logout);
 // router.get("/testroute",isSignedIn, (req,res) =>{
 //     //res.send("a protected route");
+//     //getting results because of userProperty
 //     res.json(req.auth);
 // } );
 

@@ -12,6 +12,7 @@ module.exports.register = (req, res) =>{
     //brings out all the error if any 
     const errors = validationResult(req);
     if(!errors.isEmpty()){
+        console.log("validation error");
         return res.status(422).json({
 
             error: errors.array()[0].msg,
@@ -20,21 +21,24 @@ module.exports.register = (req, res) =>{
     }
 
     if(password != confirm_password){
-        return res.status(404).json({  message: "pass do not match"});
+        console.log("password", password);
+        console.log("confirm_password", confirm_password);
+        console.log("pass do not match")
+        return res.status(404).json({  error: "pass do not match"});
     }
 
     //Checks whether email already exists or not
     User.findOne({email:email}, function(err,user){
         if(err){
             console.log(err);
-            return res.status(404).json({ status: 404, message: "There is an error in finding user in db"});
+            return res.status(404).json({ status: 404, error: "There is an error in finding user in db"});
         }
         //if email doesnt exist in db then register the user
         if(!user){
             User.create(req.body, function(err,user){
                 if(err){
                     console.log(err);
-                    return res.status(400).json({  message: "error in creating user"});
+                    return res.status(400).json({  error: "error in creating user"});
                 }
                 user.password = password;
                 user.save();
@@ -43,7 +47,7 @@ module.exports.register = (req, res) =>{
         }
         //else it returns that you are already registered
         else{
-            return res.status(404).json({ message: "user already registered"});
+            return res.status(404).json({ error: "user already registered"});
         }
 
     })
@@ -67,7 +71,7 @@ module.exports.login = (req,res) =>{
         //default encryption algorithm = HMAC SHA 256
         const token = jwt.sign({ _id: user._id}, process.env.JWTSECRET, {algorithm: 'HS256'});
         //put token in cookie
-        res.cookie("token", token, {expire: new Date() + 9999});
+        //res.cookie("token", token, {expire: new Date() + 9999});
         
         //sending response to frontend
         return res.json({token});
@@ -84,8 +88,21 @@ module.exports.isSignedIn = expressJwt({
     secret: process.env.JWTSECRET,
     algorithms: ['HS256'],
 
-    //this user property appends auth to our req.user and if we log it then we get _id & iat
-    //_id is the one stored in the database 
+    //this user property appends auth to our req and if we log it then we get _id & iat
+    //_id is the one stored in the database
+    //if we log req.auth then we get _id and iat 
     userProperty: "auth"
     
 });
+
+//custom middlewares 
+module.exports.isAuthenticated = (req, res, next) =>{
+    //req.profile is going to be set from the frontend
+    let checker = req.profile && req.auth && req.profile._id == req.auth._id;
+    if(!checker){
+        res.status(403).json({
+            error: "ACCESS DENIED"
+        })
+    }
+    next();
+}
