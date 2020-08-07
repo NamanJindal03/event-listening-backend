@@ -71,7 +71,7 @@ module.exports.login = (req,res) =>{
         //default encryption algorithm = HMAC SHA 256
         const token = jwt.sign({ _id: user._id}, process.env.JWTSECRET, {algorithm: 'HS256'});
         //put token in cookie
-        //res.cookie("token", token, {expire: new Date() + 9999});
+        res.cookie("token", token, {expire: new Date() + 9999});
         
         //sending response to frontend
         return res.json({token});
