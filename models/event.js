@@ -14,11 +14,11 @@ const eventSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  date : {
+  dateTime : {
     type: String,
     required: true
   },
-  time: {
+  location : {
     type: String,
     required: true
   },

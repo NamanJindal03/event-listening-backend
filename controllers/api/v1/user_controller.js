@@ -7,6 +7,7 @@ module.exports.getUserById = (req, res, next, id) =>{
             })
         }
         req.profile = user;
+        console.log("req.profile set", req.profile);
         next();
     })
 }
